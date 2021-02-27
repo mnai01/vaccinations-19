@@ -1,24 +1,27 @@
-import logo from './logo.svg';
-import './App.css';
+import './scss/style.scss';
+import { UserProvider, UserContext } from './covidContext';
+import {
+  Route,
+  Link,
+  BrowserRouter as Router,
+  Switch,
+  Redirect,
+} from 'react-router-dom';
+import Dashboard from './components/Dashboard';
+import Navbar from './components/layout/Navbar';
+import { Test } from './components/Test';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <UserProvider>
+      <Router>
+        <Navbar />
+        <Switch>
+          <Route exact path='/' component={Dashboard} />
+          <Route exact path='/test' component={Test} />
+        </Switch>
+      </Router>
+    </UserProvider>
   );
 }
 
