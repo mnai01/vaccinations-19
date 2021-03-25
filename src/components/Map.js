@@ -5,6 +5,7 @@ import { LineLayer, ScatterplotLayer } from '@deck.gl/layers';
 import { StaticMap } from 'react-map-gl';
 import { CovidContext } from '../covidContext';
 import USCords from '../data/USstates_avg_latLong.json';
+import './Map.scss';
 
 // Viewport settings
 const INITIAL_VIEW_STATE = {
@@ -62,12 +63,14 @@ export function Map() {
   });
 
   return (
-    <DeckGL
-      initialViewState={INITIAL_VIEW_STATE}
-      controller={true}
-      layers={[layer]}
-    >
-      <StaticMap mapboxApiAccessToken={MAPBOX_TOKEN} />
-    </DeckGL>
+    <div className='map'>
+      <DeckGL
+        initialViewState={INITIAL_VIEW_STATE}
+        controller={true}
+        layers={[layer]}
+      >
+        <StaticMap mapboxApiAccessToken={MAPBOX_TOKEN} />
+      </DeckGL>
+    </div>
   );
 }
