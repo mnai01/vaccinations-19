@@ -1,11 +1,14 @@
 /// app.js
 import React, { useEffect, useContext } from 'react';
+import './Map.scss';
 import DeckGL from '@deck.gl/react';
 import { LineLayer, ScatterplotLayer } from '@deck.gl/layers';
 import { StaticMap } from 'react-map-gl';
 import { CovidContext } from '../covidContext';
 import USCords from '../data/USstates_avg_latLong.json';
-import './Map.scss';
+import USstatesPoly from '../data/us-states_poly.json';
+import randomPointsOnPolygon from 'random-points-on-polygon';
+import * as turf from '@turf/turf';
 
 // Viewport settings
 const INITIAL_VIEW_STATE = {
@@ -18,11 +21,36 @@ const INITIAL_VIEW_STATE = {
 
 // Token
 const MAPBOX_TOKEN = process.env.REACT_APP_API_KEY;
-
 export function Map() {
   const { vaccineData, covidData, loading } = useContext(CovidContext);
   console.log(vaccineData);
   // console.log(covidData);
+  let allpoints = [];
+
+  vaccineData.map((j) => {
+    USstatesPoly.features.map((i) => {
+      if (j.state === i.properties.name) {
+        if (i.geometry.type === 'Polygon') {
+          let polygon = turf.polygon(i.geometry.coordinates);
+          var points = randomPointsOnPolygon(
+            j.data.doses_admin / 10000,
+            polygon
+          );
+        } else if (i.geometry.type === 'MultiPolygon') {
+          let multipolygon = turf.multiPolygon(i.geometry.coordinates);
+          var points = randomPointsOnPolygon(
+            j.data.doses_admin / 10000,
+            multipolygon
+          );
+        } else {
+          console.log('NOT POLY OR MULTI');
+        }
+        j.points = points;
+        allpoints.push(...points);
+        // console.log(allpoints);
+      }
+    });
+  });
 
   for (let i = 0; i < vaccineData.length; i++) {
     console.log(vaccineData[i].state);
@@ -36,29 +64,20 @@ export function Map() {
     }
   }
 
-  const data = [
-    {
-      name: 'Colma (COLM)',
-      code: 'CM',
-      address: '365 D Street, Colma CA 94014',
-      exits: 4214,
-      coordinates: [-122.466233, 37.684638],
-    },
-  ];
-
+  // / 1000
   const layer = new ScatterplotLayer({
     id: 'scatterplot-layer',
-    data: vaccineData,
+    data: allpoints,
     pickable: true,
     opacity: 0.8,
     stroked: true,
     filled: true,
     radiusScale: 1,
-    radiusMinPixels: 10,
-    radiusMaxPixels: 100,
+    radiusMinPixels: 2,
+    radiusMaxPixels: 10,
     lineWidthMinPixels: 1,
-    getPosition: (d) => d.coordinates,
-    getFillColor: (d) => [255, 140, 0],
+    getPosition: (d) => d.geometry.coordinates,
+    getFillColor: (d) => [0, 0, 255],
     getLineColor: (d) => [0, 0, 0],
   });
 
