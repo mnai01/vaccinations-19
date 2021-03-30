@@ -1,4 +1,10 @@
-import { ERROR, GET_COVID, GET_VACCINE, LOADING } from './covidTypes';
+import {
+  ERROR,
+  GET_COVID,
+  GET_VACCINE,
+  LOADING,
+  FINISHED_LOADING,
+} from './covidTypes';
 
 export default (state, action) => {
   const { type, payload } = action;
@@ -7,21 +13,32 @@ export default (state, action) => {
     case GET_COVID:
       return {
         ...state,
-        loading: false,
+        error: false,
         covidData: payload.data,
       };
 
     case GET_VACCINE:
       return {
         ...state,
-        loading: false,
+        error: false,
         vaccineData: payload.data,
       };
-    case ERROR:
     case LOADING:
       return {
+        ...state,
         loading: true,
+      };
+    case ERROR:
+      return {
+        ...state,
         error: true,
       };
+    case FINISHED_LOADING:
+      return {
+        ...state,
+        loading: false,
+      };
+    default:
+      return state;
   }
 };
