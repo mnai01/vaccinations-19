@@ -23,16 +23,25 @@ export const Test = () => {
     getCovidData,
     error,
     loading,
+    changeState,
+    testFunc,
   } = useContext(CovidContext);
 
-  useEffect(() => {
-    getCovidData();
-    getVaccineData();
-  }, []);
+  // useEffect(() => {
+  //   getCovidData();
+  //   getVaccineData();
+  // }, []);
 
   if (!loading) {
     console.log(covidData);
-    console.log(vaccineData);
+    console.log(error);
   }
-  return <div>test</div>;
+  console.log(error);
+
+  return (
+    <div>
+      <h1>test</h1> <h1>{error}</h1>testkFunc
+      <button onClick={() => testFunc()}>Click me</button>
+    </div>
+  );
 };
