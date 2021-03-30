@@ -9,6 +9,7 @@ import USCords from '../data/USstates_avg_latLong.json';
 import USstatesPoly from '../data/us-states_poly.json';
 import randomPointsOnPolygon from 'random-points-on-polygon';
 import * as turf from '@turf/turf';
+import states from 'us-state-codes';
 
 // Viewport settings
 const INITIAL_VIEW_STATE = {
@@ -22,10 +23,11 @@ const INITIAL_VIEW_STATE = {
 // Token
 const MAPBOX_TOKEN = process.env.REACT_APP_API_KEY;
 export function Map() {
-  const { vaccineData, covidData, loading } = useContext(CovidContext);
+  console.log('Map');
+  const { vaccineData, covidData, clickFunc } = useContext(CovidContext);
   console.log(vaccineData);
-  // console.log(covidData);
-  let allpoints = [];
+  console.log(covidData);
+  let allVaccinePoints = [];
 
   vaccineData.map((j) => {
     USstatesPoly.features.map((i) => {
@@ -46,28 +48,42 @@ export function Map() {
           console.log('NOT POLY OR MULTI');
         }
         j.points = points;
-        allpoints.push(...points);
-        // console.log(allpoints);
+        allVaccinePoints.push(...points);
+        // console.log(allVaccinePoints);
       }
     });
   });
 
-  for (let i = 0; i < vaccineData.length; i++) {
-    console.log(vaccineData[i].state);
-    for (let j = 0; j < USCords.length; j++) {
-      if (vaccineData[i].state === USCords[j].state) {
-        vaccineData[i].coordinates = [
-          USCords[j].longitude,
-          USCords[j].latitude,
-        ];
+  let allCoivdPoints = [];
+
+  covidData.map((j) => {
+    let alphaCode = j.state;
+    j.state = states.getStateNameByStateCode(alphaCode);
+    console.log(j.state, states.getStateNameByStateCode(alphaCode));
+  });
+
+  covidData.map((j) => {
+    USstatesPoly.features.map((i) => {
+      if (j.state === i.properties.name) {
+        if (i.geometry.type === 'Polygon') {
+          let polygon = turf.polygon(i.geometry.coordinates);
+          var points = randomPointsOnPolygon(j.positive / 10000, polygon);
+        } else if (i.geometry.type === 'MultiPolygon') {
+          let multipolygon = turf.multiPolygon(i.geometry.coordinates);
+          var points = randomPointsOnPolygon(j.positive / 10000, multipolygon);
+        } else {
+          console.log('NOT POLY OR MULTI');
+        }
+        allCoivdPoints.push(...points);
+        console.log(allCoivdPoints, j.state);
       }
-    }
-  }
+    });
+  });
 
   // / 1000
   const layer = new ScatterplotLayer({
-    id: 'scatterplot-layer',
-    data: allpoints,
+    id: 'scatterplot-vaccine-layer',
+    data: allVaccinePoints,
     pickable: true,
     opacity: 0.8,
     stroked: true,
@@ -81,12 +97,28 @@ export function Map() {
     getLineColor: (d) => [0, 0, 0],
   });
 
+  const covid_Layer = new ScatterplotLayer({
+    id: 'scatterplot-covid-layer',
+    data: allCoivdPoints,
+    pickable: true,
+    opacity: 0.8,
+    stroked: true,
+    filled: true,
+    radiusScale: 1,
+    radiusMinPixels: 2,
+    radiusMaxPixels: 10,
+    lineWidthMinPixels: 1,
+    getPosition: (d) => d.geometry.coordinates,
+    getFillColor: (d) => [255, 0, 0],
+    getLineColor: (d) => [0, 0, 0],
+  });
+
   return (
     <div className='map'>
       <DeckGL
         initialViewState={INITIAL_VIEW_STATE}
         controller={true}
-        layers={[layer]}
+        layers={[covid_Layer]}
       >
         <StaticMap mapboxApiAccessToken={MAPBOX_TOKEN} />
       </DeckGL>
