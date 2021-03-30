@@ -3,17 +3,19 @@ import { Map } from './Map';
 import { CovidContext } from '../covidContext';
 
 const Dashboard = () => {
-  const { getVaccineData, getCovidData, loading } = useContext(CovidContext);
+  console.log('Dashboard');
+
+  const { loading, error, getAllData, vaccineData, covidData } = useContext(
+    CovidContext
+  );
 
   useEffect(() => {
-    getCovidData();
-    getVaccineData();
+    getAllData();
   }, []);
 
   return (
     <div>
-      {!loading ? <Map /> : 'loading'}
-
+      {!loading && !error ? <Map /> : 'loading'}
       <h1>MAP GOES HERE</h1>
     </div>
   );
