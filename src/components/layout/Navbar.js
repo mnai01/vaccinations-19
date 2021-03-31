@@ -11,13 +11,7 @@ const Navbar = () => {
       </h1>
       <ul>
         <li>
-          <Link>Ian</Link>
-        </li>
-        <li>
-          <Link>Josh</Link>
-        </li>
-        <li>
-          <Link>Nick</Link>
+          <Link to={{ pathname: 'https://github.com/mnai01' }}>Ian</Link>
         </li>
         <li>
           <Link to='/test'>Test</Link>
