@@ -13,11 +13,6 @@ const Dashboard = () => {
     getAllData();
   }, []);
 
-  return (
-    <div>
-      {!loading && !error ? <Map /> : 'loading'}
-      <h1>MAP GOES HERE</h1>
-    </div>
-  );
+  return <div>{!loading && !error ? <Map /> : 'loading'}</div>;
 };
 export default Dashboard;

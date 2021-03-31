@@ -62,6 +62,7 @@ export const UserProvider = ({ children }) => {
   async function getAllData() {
     dispatch({ type: LOADING });
     try {
+      console.log('CALLING API');
       const getVac = await axios.get(
         'https://jhucoronavirus.azureedge.net/jhucoronavirus/state_vaccination_rates.json'
       );
@@ -76,7 +77,6 @@ export const UserProvider = ({ children }) => {
       console.log(err);
       console.log('error in getVaccineData()');
     }
-
     dispatch({ type: FINISHED_LOADING });
   }
 

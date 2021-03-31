@@ -24,8 +24,6 @@ const MAPBOX_TOKEN = process.env.REACT_APP_API_KEY;
 export function Map() {
   console.log('Map');
   const { vaccineData, covidData } = useContext(CovidContext);
-  console.log(vaccineData);
-  console.log(covidData);
 
   let allVaccinePoints = [];
 
@@ -79,7 +77,6 @@ export function Map() {
           } else {
             console.log('NOT POLY OR MULTI');
           }
-          console.log(points);
           allCovidPoints.push(...points);
         }
       });
@@ -136,8 +133,6 @@ export function Map() {
       getLineColor: (d) => [0, 0, 0],
     }),
   ];
-  console.log('covid', allCovidPoints);
-  console.log('vaccine', allVaccinePoints);
 
   return (
     <div className='map'>
