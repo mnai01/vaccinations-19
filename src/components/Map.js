@@ -21,6 +21,9 @@ const INITIAL_VIEW_STATE = {
 
 // Token
 const MAPBOX_TOKEN = process.env.REACT_APP_API_KEY;
+const TEST_TOKEN = process.env.REACT_APP_TEST_TOKEN;
+console.log(TEST_TOKEN);
+
 export function Map() {
   console.log('Map');
   const { vaccineData, covidData } = useContext(CovidContext);
