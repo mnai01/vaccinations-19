@@ -3,7 +3,8 @@ import React, { useEffect, useContext } from 'react';
 import './Map.scss';
 import DeckGL from '@deck.gl/react';
 import { LineLayer, ScatterplotLayer } from '@deck.gl/layers';
-import mapboxgl from 'mapbox-gl';
+// eslint-disable-next-line import/no-webpack-loader-syntax
+import mapboxgl from '!mapbox-gl';
 
 import { StaticMap } from 'react-map-gl';
 import { CovidContext } from '../covidContext';
@@ -15,6 +16,7 @@ import states from 'us-state-codes';
 
 // Used to resolve
 // Uncaught ReferenceError: g is not defined
+// eslint-disable-next-line import/no-webpack-loader-syntax
 mapboxgl.workerClass = require('worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker').default;
 
 // Viewport settings
