@@ -3,6 +3,8 @@ import React, { useEffect, useContext } from 'react';
 import './Map.scss';
 import DeckGL from '@deck.gl/react';
 import { LineLayer, ScatterplotLayer } from '@deck.gl/layers';
+import mapboxgl from 'mapbox-gl';
+
 import { StaticMap } from 'react-map-gl';
 import { CovidContext } from '../covidContext';
 import USCords from '../data/USstates_avg_latLong.json';
@@ -10,6 +12,11 @@ import USstatesPoly from '../data/us-states_poly.json';
 import randomPointsOnPolygon from 'random-points-on-polygon';
 import * as turf from '@turf/turf';
 import states from 'us-state-codes';
+
+// Used to resolve
+// Uncaught ReferenceError: g is not defined
+mapboxgl.workerClass = require('worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker').default;
+
 // Viewport settings
 const INITIAL_VIEW_STATE = {
   longitude: -87.6500523,
