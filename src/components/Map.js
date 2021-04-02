@@ -3,8 +3,6 @@ import React, { useEffect, useContext } from 'react';
 import './Map.scss';
 import DeckGL from '@deck.gl/react';
 import { LineLayer, ScatterplotLayer } from '@deck.gl/layers';
-// eslint-disable-next-line import/no-webpack-loader-syntax
-import mapboxgl from '!mapbox-gl';
 
 import { StaticMap } from 'react-map-gl';
 import { CovidContext } from '../covidContext';
@@ -13,6 +11,12 @@ import USstatesPoly from '../data/us-states_poly.json';
 import randomPointsOnPolygon from 'random-points-on-polygon';
 import * as turf from '@turf/turf';
 import states from 'us-state-codes';
+
+// Used to resolve
+// Uncaught ReferenceError: y is not defined
+// eslint-disable-next-line import/no-webpack-loader-syntax
+import 'mapbox-gl/dist/mapbox-gl.css';
+import mapboxgl from 'mapbox-gl';
 
 // Used to resolve
 // Uncaught ReferenceError: g is not defined
