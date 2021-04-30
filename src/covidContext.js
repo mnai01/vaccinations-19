@@ -66,9 +66,9 @@ export const UserProvider = ({ children }) => {
       const getVac = await axios.get(
         'https://jhucoronavirus.azureedge.net/jhucoronavirus/state_vaccination_rates.json'
       );
-      const getCov = await axios.get(
-        'https://api.covidtracking.com/v1/states/current.json'
-      );
+      console.log(getVac);
+      const getCov = await axios.get('https://corona.lmao.ninja/v2/states');
+      console.log(getCov);
 
       dispatch({ type: GET_VACCINE, payload: getVac });
       dispatch({ type: GET_COVID, payload: getCov });

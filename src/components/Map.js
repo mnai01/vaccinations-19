@@ -1,17 +1,9 @@
 /// app.js
-import React, { useEffect, useContext } from 'react';
+import React, { useMemo, useState, useContext } from 'react';
 import './Map.scss';
 import DeckGL from '@deck.gl/react';
-import { LineLayer, ScatterplotLayer } from '@deck.gl/layers';
-
+import { ScatterplotLayer, GeoJsonLayer } from '@deck.gl/layers';
 import { StaticMap } from 'react-map-gl';
-import { CovidContext } from '../covidContext';
-import USCords from '../data/USstates_avg_latLong.json';
-import USstatesPoly from '../data/us-states_poly.json';
-import randomPointsOnPolygon from 'random-points-on-polygon';
-import * as turf from '@turf/turf';
-import states from 'us-state-codes';
-
 // Used to resolve
 // Uncaught ReferenceError: y is not defined
 // eslint-disable-next-line import/no-webpack-loader-syntax
@@ -37,90 +29,33 @@ const MAPBOX_TOKEN = process.env.REACT_APP_API_KEY;
 const TEST_TOKEN = process.env.REACT_APP_TEST_TOKEN;
 console.log(TEST_TOKEN);
 
-export function Map() {
-  console.log('Map');
-  const { vaccineData, covidData } = useContext(CovidContext);
+export function Map({ covidPoints, vaccinePoints, statesData }) {
+  const [hoverInfo, setHoverInfo] = useState();
 
-  let allVaccinePoints = [];
-
-  vaccineData.map((j) => {
-    let points = 0;
-
-    if (j.data.doses_admin !== 0) {
-      USstatesPoly.features.map((i) => {
-        if (j.state === i.properties.name) {
-          if (i.geometry.type === 'Polygon') {
-            let polygon = turf.polygon(i.geometry.coordinates);
-            points = randomPointsOnPolygon(j.data.doses_admin / 10000, polygon);
-          } else if (i.geometry.type === 'MultiPolygon') {
-            let multipolygon = turf.multiPolygon(i.geometry.coordinates);
-            points = randomPointsOnPolygon(
-              j.data.doses_admin / 10000,
-              multipolygon
-            );
-          } else {
-            console.log('NOT POLY OR MULTI');
-          }
-          j.points = points;
-          allVaccinePoints.push(...points);
-        }
-      });
-    } else {
-      console.log('ERROR DATA', j.state);
+  const handlersSetHoverInfo = (data) => {
+    if (data.object !== undefined) {
+      setHoverInfo(data);
+      console.log(data);
     }
-  });
-
-  let allCovidPoints = [];
-
-  covidData.map((j) => {
-    // If state data is not 0 then execute code
-    if (j.positive !== 0) {
-      // *API returns data in abbreviation form*
-      // Convert State Code from the API to State Name
-      let alphaCode = j.state;
-      let state = states.getStateNameByStateCode(alphaCode);
-      // Maps through polygon list of each state
-      USstatesPoly.features.map((i) => {
-        let points = 0;
-        // if covidData state name equals polygon data state name
-        if (state === i.properties.name) {
-          if (i.geometry.type === 'Polygon') {
-            let polygon = turf.polygon(i.geometry.coordinates);
-            points = randomPointsOnPolygon(j.positive / 10000, polygon);
-          } else if (i.geometry.type === 'MultiPolygon') {
-            let multipolygon = turf.multiPolygon(i.geometry.coordinates);
-            points = randomPointsOnPolygon(j.positive / 10000, multipolygon);
-          } else {
-            console.log('NOT POLY OR MULTI');
-          }
-          allCovidPoints.push(...points);
-        }
-      });
-    }
-  });
-
-  // / 1000
-  // const layer = new ScatterplotLayer({
-  //   id: 'scatterplot-vaccine-layer',
-  //   data: allVaccinePoints,
-  //   pickable: true,
-  //   opacity: 0.8,
-  //   stroked: true,
-  //   filled: true,
-  //   radiusScale: 1,
-  //   radiusMinPixels: 2,
-  //   radiusMaxPixels: 10,
-  //   lineWidthMinPixels: 1,
-  //   getPosition: (d) => d.geometry.coordinates,
-  //   getFillColor: (d) => [0, 0, 255],
-  //   getLineColor: (d) => [0, 0, 0],
-  // });
-  // console.log('vaccine', allVaccinePoints);
+  };
 
   const layers = [
+    new GeoJsonLayer({
+      data: statesData.features,
+      opacity: 0.8,
+      stroked: false,
+      filled: true,
+      extruded: true,
+      wireframe: true,
+      getElevation: (f) => 0,
+      // getElevation: (f) => f.properties.density * 100,
+      getFillColor: (f) => [f.properties.density, 255, 0],
+      pickable: true,
+      onHover: (info) => handlersSetHoverInfo(info),
+    }),
     new ScatterplotLayer({
       id: 'scatterplot-covid-layer',
-      data: allCovidPoints,
+      data: covidPoints,
       pickable: true,
       opacity: 0.8,
       stroked: true,
@@ -136,9 +71,9 @@ export function Map() {
     }),
     new ScatterplotLayer({
       id: 'scatterplot-vaccine-layer',
-      data: allVaccinePoints,
+      data: vaccinePoints,
       pickable: true,
-      opacity: 0.5,
+      opacity: 0.2,
       stroked: true,
       filled: true,
       radiusScale: 1,
@@ -149,7 +84,22 @@ export function Map() {
       getFillColor: (d) => [0, 0, 255],
       getRadius: 2.5,
       getLineColor: (d) => [0, 0, 0],
+      // Update app state
     }),
+    // new PolygonLayer({
+    //   id: 'polygon-layer',
+    //   data: statesData.features,
+    //   pickable: true,
+    //   stroked: true,
+    //   filled: true,
+    //   wireframe: true,
+    //   lineWidthMinPixels: 1,
+    //   getPolygon: (d) => d.geometry.coordinates[0],
+    //   getElevation: (d) => d.properties.density / 10,
+    //   getFillColor: (d) => [d.properties.density / 60, 140, 0],
+    //   getLineColor: [80, 80, 80],
+    //   getLineWidth: 1,
+    // }),
   ];
 
   return (
@@ -159,8 +109,35 @@ export function Map() {
         controller={true}
         layers={layers}
       >
+        {hoverInfo && (
+          <div
+            style={{
+              position: 'absolute',
+              zIndex: 1,
+              pointerEvents: 'none',
+              left: hoverInfo.x,
+              top: hoverInfo.y + 15,
+              fontWeight: 'bold',
+              background: '#f5f5f5',
+            }}
+          >
+            <div>
+              <span>
+                {hoverInfo.object.healthData.covidCases.state} covid:
+                {hoverInfo.object.healthData.covidCases.active}{' '}
+              </span>
+            </div>
+            <div>
+              <span>
+                {hoverInfo.object.healthData.vaccineCases.data.state} vaccine:
+                {hoverInfo.object.healthData.vaccineCases.data.doses_admin}{' '}
+              </span>
+            </div>
+          </div>
+        )}
         <StaticMap mapboxApiAccessToken={MAPBOX_TOKEN} />
       </DeckGL>
     </div>
   );
 }
+export default Map;
