@@ -126,14 +126,22 @@ export function Map({ covidPoints, vaccinePoints, statesData }) {
             }}
           >
             <div>
+              <h3>
+                {' '}
+                {hoverInfo.object.healthData.covidCases
+                  ? hoverInfo.object.healthData.covidCases.state
+                  : hoverInfo.object.healthData.vaccineCases.state}
+              </h3>
               <span>
-                {hoverInfo.object.healthData.covidCases.state} covid:
-                {hoverInfo.object.healthData.covidCases.active}{' '}
+                covid:{' '}
+                {hoverInfo.object.healthData.covidCases
+                  ? hoverInfo.object.healthData.covidCases.active
+                  : null}{' '}
               </span>
             </div>
             <div>
               <span>
-                {hoverInfo.object.healthData.vaccineCases.data.state} vaccine:
+                vaccine:
                 {hoverInfo.object.healthData.vaccineCases.data.doses_admin}{' '}
               </span>
             </div>
