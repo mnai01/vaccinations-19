@@ -49,7 +49,11 @@ export function Map({ covidPoints, vaccinePoints, statesData }) {
       wireframe: true,
       getElevation: (f) => 0,
       // getElevation: (f) => f.properties.density * 100,
-      getFillColor: (f) => [f.properties.density, 255, 0],
+      getFillColor: (f) => [
+        f.healthData.covidCases ? f.healthData.covidCases.active / 1000 : 255,
+        255,
+        0,
+      ],
       pickable: true,
       onHover: (info) => handlersSetHoverInfo(info),
     }),
